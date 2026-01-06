@@ -614,6 +614,8 @@
             const [editing, setEditing] = React.useState(false);
             const [content, setContent] = React.useState('');
             const [sidebarOpen, setSidebarOpen] = React.useState(true);
+            const [editingTabId, setEditingTabId] = React.useState(null);
+            const [editingTabTitle, setEditingTabTitle] = React.useState('');
             const [configError, setConfigError] = React.useState(!window.FIREBASE_CONFIG);
             const [expandedGroups, setExpandedGroups] = React.useState({});
             const [draggedItem, setDraggedItem] = React.useState(null);
@@ -728,6 +730,16 @@
                     content, lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 setEditing(false);
+            };
+
+            const renameTab = async () => {
+                if (!editingTabId || !editingTabTitle.trim()) return;
+                await db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('project_tabs').doc(editingTabId).update({
+                    title: editingTabTitle,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                setEditingTabId(null);
+                setEditingTabTitle('');
             };
 
             const deleteTab = async (id) => {
@@ -897,6 +909,7 @@
                                             <span className="tab-icon">{isParent ? '📁' : '📄'}</span>
                                             <span className="tab-title">{tab.title}</span>
                                             <div className="tab-actions">
+                                                <span className="tab-delete" onClick={(e) => { e.stopPropagation(); setEditingTabId(tab.id); setEditingTabTitle(tab.title); }}>✏️</span>
                                                 <span className="tab-delete" onClick={(e) => { e.stopPropagation(); deleteTab(tab.id); }}>🗑️</span>
                                             </div>
                                         </div>
@@ -910,16 +923,15 @@
                             <div className="header-left">
                                 <button className="btn-menu" onClick={() => setSidebarOpen(!sidebarOpen)}>☰</button>
                                 {activeTab && <div className="title">{activeTab.title}</div>}
+                                {activeTab && !editing && (
+                                    <button className="btn btn-secondary" onClick={() => setEditing(true)} style={{ marginLeft: 16 }}>✏️ Düzenle</button>
+                                )}
                             </div>
-                            {activeTab && (
-                                editing ? (
-                                    <div style={{ display: 'flex', gap: 8 }}>
-                                        <button className="btn-cancel" onClick={() => setEditing(false)}>İptal</button>
-                                        <button className="btn btn-primary" onClick={saveContent}>💾 Kaydet</button>
-                                    </div>
-                                ) : (
-                                    <button className="btn btn-secondary" onClick={() => setEditing(true)}>✏️ Düzenle</button>
-                                )
+                            {activeTab && editing && (
+                                <div style={{ display: 'flex', gap: 8 }}>
+                                    <button className="btn-cancel" onClick={() => setEditing(false)}>İptal</button>
+                                    <button className="btn btn-primary" onClick={saveContent}>💾 Kaydet</button>
+                                </div>
                             )}
                         </div>
                         <div className="content">
@@ -1013,6 +1025,29 @@
                                 <div className="modal-btns">
                                     <button className="btn-cancel" onClick={() => setShowModal(false)}>İptal</button>
                                     <button className="btn btn-primary" onClick={addTab} disabled={!newTitle.trim()}>Oluştur</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    {editingTabId && (
+                        <div className="modal-bg" onClick={() => setEditingTabId(null)}>
+                            <div className="modal" onClick={e => e.stopPropagation()}>
+                                <h3>Sekme Başlığını Düzenle</h3>
+                                <input
+                                    className="input"
+                                    value={editingTabTitle}
+                                    onChange={e => setEditingTabTitle(e.target.value)}
+                                    onKeyDown={e => {
+                                        if (e.key === 'Enter' && editingTabTitle.trim()) {
+                                            renameTab();
+                                        }
+                                    }}
+                                    placeholder="Yeni başlık..."
+                                    autoFocus
+                                />
+                                <div className="modal-btns">
+                                    <button className="btn-cancel" onClick={() => setEditingTabId(null)}>İptal</button>
+                                    <button className="btn btn-primary" onClick={renameTab} disabled={!editingTabTitle.trim()}>Kaydet</button>
                                 </div>
                             </div>
                         </div>
