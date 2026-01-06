@@ -75,11 +75,13 @@
             padding: 12px;
             margin: 4px 0;
             border-radius: 6px;
-            cursor: pointer;
+            cursor: move;
             display: flex;
             align-items: center;
             gap: 8px;
             font-size: 14px;
+            position: relative;
+            transition: all 0.2s;
         }
 
         .tab-item:hover {
@@ -89,6 +91,87 @@
         .tab-item.active {
             background: #334155;
             color: #fff;
+        }
+
+        .tab-item.parent {
+            font-weight: 600;
+            background: #1e293b;
+        }
+
+        .tab-item.parent.active {
+            background: #334155;
+        }
+
+        .tab-item.child {
+            margin-left: 24px;
+            font-size: 13px;
+            background: #0f172a;
+        }
+
+        .tab-item.child:hover {
+            background: #1e293b;
+        }
+
+        .tab-item.child.active {
+            background: #334155;
+        }
+
+        .tab-item.dragging {
+            opacity: 0.5;
+        }
+
+        .tab-item.drag-over {
+            border-top: 2px solid #f59e0b;
+        }
+
+        .expand-btn {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 0;
+            font-size: 12px;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .expand-btn:hover {
+            color: #f59e0b;
+        }
+
+        .tab-icon {
+            font-size: 16px;
+        }
+
+        .tab-title {
+            flex: 1;
+        }
+
+        .tab-actions {
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .tab-item:hover .tab-actions {
+            opacity: 1;
+        }
+
+        .tab-delete {
+            opacity: 0.5;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .tab-delete:hover {
+            opacity: 1;
+            background: #ef4444;
         }
 
         .main {
@@ -255,6 +338,35 @@
             margin: 20px;
             text-align: center;
         }
+
+        .radio-group {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: #cbd5e1;
+        }
+
+        .radio-label input[type="radio"] {
+            cursor: pointer;
+        }
+
+        .select {
+            width: 100%;
+            padding: 12px;
+            background: #0f172a;
+            border: 1px solid #475569;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
     </style>
 </head>
 
@@ -297,10 +409,15 @@
             const [loading, setLoading] = React.useState(true);
             const [showModal, setShowModal] = React.useState(false);
             const [newTitle, setNewTitle] = React.useState('');
+            const [newTabType, setNewTabType] = React.useState('parent'); // 'parent' or 'child'
+            const [selectedParentId, setSelectedParentId] = React.useState('');
             const [editing, setEditing] = React.useState(false);
             const [content, setContent] = React.useState('');
             const [sidebarOpen, setSidebarOpen] = React.useState(true);
             const [configError, setConfigError] = React.useState(!window.FIREBASE_CONFIG);
+            const [expandedGroups, setExpandedGroups] = React.useState({});
+            const [draggedItem, setDraggedItem] = React.useState(null);
+            const [dragOverItem, setDragOverItem] = React.useState(null);
 
             // Auth
             React.useEffect(() => {
@@ -322,6 +439,15 @@
                         setTabs(data);
                         if (!activeTabId && data.length > 0) setActiveTabId(data[0].id);
                         setLoading(false);
+
+                        // Auto-expand groups with children
+                        const newExpanded = {};
+                        data.forEach(tab => {
+                            if (tab.type === 'parent') {
+                                newExpanded[tab.id] = expandedGroups[tab.id] !== undefined ? expandedGroups[tab.id] : true;
+                            }
+                        });
+                        setExpandedGroups(newExpanded);
                     }, err => {
                         console.error('Data error:', err);
                         setLoading(false);
@@ -336,12 +462,29 @@
 
             const addTab = async () => {
                 if (!newTitle.trim()) return;
+                if (newTabType === 'child' && !selectedParentId) {
+                    alert('Lütfen bir ana dal seçin');
+                    return;
+                }
+
                 const order = tabs.length > 0 ? Math.max(...tabs.map(t => t.order || 0)) + 1 : 0;
-                await db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('project_tabs').add({
-                    title: newTitle, content: 'Buraya yazın...', order, createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                const newTab = {
+                    title: newTitle,
+                    content: 'Buraya yazın...',
+                    order,
+                    type: newTabType,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                if (newTabType === 'child') {
+                    newTab.parentId = selectedParentId;
+                }
+
+                await db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('project_tabs').add(newTab);
                 setShowModal(false);
                 setNewTitle('');
+                setNewTabType('parent');
+                setSelectedParentId('');
             };
 
             const saveContent = async () => {
@@ -353,10 +496,114 @@
             };
 
             const deleteTab = async (id) => {
+                const tab = tabs.find(t => t.id === id);
+                if (!tab) return;
+
+                // Check if it's a parent with children
+                if (tab.type === 'parent') {
+                    const hasChildren = tabs.some(t => t.parentId === id);
+                    if (hasChildren) {
+                        alert('Bu ana dalın altında alt dallar var. Önce alt dalları silin.');
+                        return;
+                    }
+                }
+
                 if (!confirm('Silmek istediğinize emin misiniz?')) return;
                 await db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('project_tabs').doc(id).delete();
                 if (activeTabId === id) setActiveTabId(null);
             };
+
+            const toggleGroup = (id) => {
+                setExpandedGroups(prev => ({
+                    ...prev,
+                    [id]: !prev[id]
+                }));
+            };
+
+            // Drag and Drop handlers
+            const handleDragStart = (e, tab) => {
+                setDraggedItem(tab);
+                e.dataTransfer.effectAllowed = 'move';
+            };
+
+            const handleDragOver = (e, tab) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+
+                if (draggedItem && draggedItem.id !== tab.id) {
+                    setDragOverItem(tab);
+                }
+            };
+
+            const handleDragLeave = (e) => {
+                setDragOverItem(null);
+            };
+
+            const handleDrop = async (e, targetTab) => {
+                e.preventDefault();
+
+                if (!draggedItem || draggedItem.id === targetTab.id) {
+                    setDraggedItem(null);
+                    setDragOverItem(null);
+                    return;
+                }
+
+                // Prevent dropping parent into child
+                if (draggedItem.type === 'parent' && targetTab.type === 'child') {
+                    alert('Ana dal, alt dalın altına taşınamaz');
+                    setDraggedItem(null);
+                    setDragOverItem(null);
+                    return;
+                }
+
+                // Prevent dropping child into another child
+                if (draggedItem.type === 'child' && targetTab.type === 'child' && draggedItem.parentId !== targetTab.parentId) {
+                    alert('Alt dal, farklı bir grubun alt dalına taşınamaz');
+                    setDraggedItem(null);
+                    setDragOverItem(null);
+                    return;
+                }
+
+                // Reorder tabs
+                const draggedIndex = tabs.findIndex(t => t.id === draggedItem.id);
+                const targetIndex = tabs.findIndex(t => t.id === targetTab.id);
+
+                const newTabs = [...tabs];
+                const [removed] = newTabs.splice(draggedIndex, 1);
+                newTabs.splice(targetIndex, 0, removed);
+
+                // Update orders in Firebase
+                const batch = db.batch();
+                newTabs.forEach((tab, index) => {
+                    const ref = db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('project_tabs').doc(tab.id);
+                    batch.update(ref, { order: index });
+                });
+
+                await batch.commit();
+                setDraggedItem(null);
+                setDragOverItem(null);
+            };
+
+            const handleDragEnd = () => {
+                setDraggedItem(null);
+                setDragOverItem(null);
+            };
+
+            // Get parent tabs for dropdown
+            const parentTabs = tabs.filter(t => t.type === 'parent');
+
+            // Organize tabs by parent-child relationship
+            const organizedTabs = [];
+            tabs.forEach(tab => {
+                if (tab.type === 'parent' || !tab.parentId) {
+                    organizedTabs.push(tab);
+                    // Add children
+                    const children = tabs.filter(t => t.parentId === tab.id);
+                    if (expandedGroups[tab.id]) {
+                        organizedTabs.push(...children);
+                    }
+                }
+            });
 
             if (configError) {
                 return (
@@ -383,12 +630,43 @@
                                     <div className="loading">Yükleniyor...</div>
                                 ) : tabs.length === 0 ? (
                                     <div className="loading">Henüz sekme yok<br />'+' ile ekleyin</div>
-                                ) : tabs.map(tab => (
-                                    <div key={tab.id} className={`tab-item ${activeTabId === tab.id ? 'active' : ''}`} onClick={() => { setActiveTabId(tab.id); setEditing(false); }}>
-                                        📄 <span style={{ flex: 1 }}>{tab.title}</span>
-                                        <span style={{ opacity: 0.5, fontSize: 12 }} onClick={(e) => { e.stopPropagation(); deleteTab(tab.id); }}>🗑️</span>
-                                    </div>
-                                ))}
+                                ) : organizedTabs.map(tab => {
+                                    const isParent = tab.type === 'parent' || !tab.parentId;
+                                    const isChild = tab.type === 'child' && tab.parentId;
+                                    const hasChildren = isParent && tabs.some(t => t.parentId === tab.id);
+                                    const isExpanded = expandedGroups[tab.id];
+                                    const isDragging = draggedItem?.id === tab.id;
+                                    const isDragOver = dragOverItem?.id === tab.id;
+
+                                    return (
+                                        <div
+                                            key={tab.id}
+                                            className={`tab-item ${isParent ? 'parent' : ''} ${isChild ? 'child' : ''} ${activeTabId === tab.id ? 'active' : ''} ${isDragging ? 'dragging' : ''} ${isDragOver ? 'drag-over' : ''}`}
+                                            onClick={() => { setActiveTabId(tab.id); setEditing(false); }}
+                                            draggable
+                                            onDragStart={(e) => handleDragStart(e, tab)}
+                                            onDragOver={(e) => handleDragOver(e, tab)}
+                                            onDragLeave={handleDragLeave}
+                                            onDrop={(e) => handleDrop(e, tab)}
+                                            onDragEnd={handleDragEnd}
+                                        >
+                                            {isParent && hasChildren && (
+                                                <button
+                                                    className="expand-btn"
+                                                    onClick={(e) => { e.stopPropagation(); toggleGroup(tab.id); }}
+                                                >
+                                                    {isExpanded ? '▼' : '▶'}
+                                                </button>
+                                            )}
+                                            {isParent && !hasChildren && <span style={{ width: 16 }}></span>}
+                                            <span className="tab-icon">{isParent ? '📁' : '📄'}</span>
+                                            <span className="tab-title">{tab.title}</span>
+                                            <div className="tab-actions">
+                                                <span className="tab-delete" onClick={(e) => { e.stopPropagation(); deleteTab(tab.id); }}>🗑️</span>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
                     )}
@@ -427,7 +705,55 @@
                         <div className="modal-bg" onClick={() => setShowModal(false)}>
                             <div className="modal" onClick={e => e.stopPropagation()}>
                                 <h3>Yeni Sekme Ekle</h3>
-                                <input className="input" value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="Sekme başlığı..." autoFocus />
+
+                                <div className="radio-group">
+                                    <label className="radio-label">
+                                        <input
+                                            type="radio"
+                                            name="tabType"
+                                            value="parent"
+                                            checked={newTabType === 'parent'}
+                                            onChange={(e) => setNewTabType(e.target.value)}
+                                        />
+                                        📁 Ana Dal
+                                    </label>
+                                    <label className="radio-label">
+                                        <input
+                                            type="radio"
+                                            name="tabType"
+                                            value="child"
+                                            checked={newTabType === 'child'}
+                                            onChange={(e) => setNewTabType(e.target.value)}
+                                        />
+                                        📄 Alt Dal
+                                    </label>
+                                </div>
+
+                                {newTabType === 'child' && (
+                                    <select
+                                        className="select"
+                                        value={selectedParentId}
+                                        onChange={(e) => setSelectedParentId(e.target.value)}
+                                    >
+                                        <option value="">Ana dal seçin...</option>
+                                        {parentTabs.map(parent => (
+                                            <option key={parent.id} value={parent.id}>{parent.title}</option>
+                                        ))}
+                                    </select>
+                                )}
+
+                                <input
+                                    className="input"
+                                    value={newTitle}
+                                    onChange={e => setNewTitle(e.target.value)}
+                                    onKeyDown={e => {
+                                        if (e.key === 'Enter' && newTitle.trim()) {
+                                            addTab();
+                                        }
+                                    }}
+                                    placeholder="Sekme başlığı..."
+                                    autoFocus
+                                />
                                 <div className="modal-btns">
                                     <button className="btn-cancel" onClick={() => setShowModal(false)}>İptal</button>
                                     <button className="btn btn-primary" onClick={addTab} disabled={!newTitle.trim()}>Oluştur</button>
