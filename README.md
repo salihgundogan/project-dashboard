@@ -4,11 +4,14 @@
 
 ## Özellikler
 
-- � Metin bazlı döküman yönetimi
-- 🔄 Gerçek zamanlı senkronizasyon (Firebase)
+- 📝 Metin bazlı döküman yönetimi
+- � **Belge yükleme** (PDF & DOCX desteği)
+- �🔄 Gerçek zamanlı senkronizasyon (Firebase)
 - ➕ Sekme ekleme/silme
 - ✏️ İçerik düzenleme
 - 📱 Responsive tasarım
+- 📤 Sürükle-bırak dosya yükleme
+- 📥 Belge indirme ve görüntüleme
 
 ## Kurulum
 
@@ -23,10 +26,31 @@ cd simsek-kurye-dashboard
 1. [Firebase Console](https://console.firebase.google.com)'a gidin
 2. Yeni proje oluşturun
 3. Web uygulaması ekleyin
-4. Authentication > Anonymous girişi etkinleştirin
-5. Firestore Database oluşturun
+4. **Authentication** > Anonymous girişi etkinleştirin
+5. **Firestore Database** oluşturun
+6. **Storage** > Storage oluşturun (Belge yükleme için gerekli)
 
-### 3. Config dosyasını oluşturun
+### 3. Firebase Storage Kuralları
+
+Firebase Console > Storage > Rules bölümünde aşağıdaki kuralları ayarlayın:
+
+```javascript
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /documents/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null 
+        && request.resource.size < 10 * 1024 * 1024  // 10MB limit
+        && (request.resource.contentType.matches('application/pdf') 
+            || request.resource.contentType.matches('application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+            || request.resource.contentType.matches('application/msword'));
+    }
+  }
+}
+```
+
+### 4. Config dosyasını oluşturun
 
 `firebase-config.example.js` dosyasını `firebase-config.js` olarak kopyalayın:
 
@@ -47,13 +71,33 @@ window.FIREBASE_CONFIG = {
 };
 ```
 
-### 4. Çalıştırın
+### 5. Çalıştırın
 
 ```bash
 python3 -m http.server 8000
 ```
 
 Tarayıcıda açın: http://localhost:8000
+
+## Kullanım
+
+### Yeni Sekme Ekleme
+
+1. Sol paneldeki **+** butonuna tıklayın
+2. Sekme türü seçin:
+   - **Metin**: Not veya metin içeriği için
+   - **Belge**: PDF veya DOCX dosyası yüklemek için
+3. Belge seçtiyseniz:
+   - **Cihazdan Yükle**: Bilgisayarınızdan dosya seçin
+   - **Google Drive**: (Yakında) Drive'dan dosya seçin
+4. Dosyanızı sürükleyip bırakın veya tıklayarak seçin
+5. Başlık girin ve yükleyin
+
+### Desteklenen Dosya Formatları
+
+- 📕 **PDF**: Tarayıcıda doğrudan görüntülenir
+- 📘 **DOCX**: HTML'e dönüştürülerek gösterilir
+- 📄 **DOC**: Word belgesi (eski format)
 
 ## Netlify'a Deploy
 
@@ -79,6 +123,8 @@ Tarayıcıda açın: http://localhost:8000
 
 - `firebase-config.js` dosyası `.gitignore`'da, GitHub'a yüklenmez
 - Firebase güvenlik kurallarını ayarlamayı unutmayın
+- Belge boyutu 10MB ile sınırlıdır
+- Sadece PDF ve DOCX formatları kabul edilir
 
 ## Lisans
 
