@@ -462,10 +462,6 @@
 
             const addTab = async () => {
                 if (!newTitle.trim()) return;
-                if (newTabType === 'child' && !selectedParentId) {
-                    alert('Lütfen bir ana dal seçin');
-                    return;
-                }
 
                 const order = tabs.length > 0 ? Math.max(...tabs.map(t => t.order || 0)) + 1 : 0;
                 const newTab = {
@@ -476,7 +472,8 @@
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
 
-                if (newTabType === 'child') {
+                // Alt dal ve ana dal seçilmişse parentId ekle
+                if (newTabType === 'child' && selectedParentId) {
                     newTab.parentId = selectedParentId;
                 }
 
@@ -735,7 +732,7 @@
                                         value={selectedParentId}
                                         onChange={(e) => setSelectedParentId(e.target.value)}
                                     >
-                                        <option value="">Ana dal seçin...</option>
+                                        <option value="">📂 Ana dizinde (bağımsız)</option>
                                         {parentTabs.map(parent => (
                                             <option key={parent.id} value={parent.id}>{parent.title}</option>
                                         ))}
