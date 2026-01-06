@@ -1,0 +1,22 @@
+# Firebase config (gizli bilgiler)
+firebase-config.js
+
+# Dependencies
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Eski dosyalar
+app.jsx
+app-simple.jsx
+styles.css
+favicon.svg
