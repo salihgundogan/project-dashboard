@@ -567,6 +567,345 @@
             flex-direction: column;
             height: 70vh;
         }
+
+        /* Mobile Menu Overlay */
+        .sidebar-overlay {
+            display: none;
+        }
+
+        /* ==================== TABLET (768px) ==================== */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100vh;
+                width: 280px;
+                z-index: 1000;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+            }
+
+            .sidebar-overlay.show {
+                display: block;
+            }
+
+            .header {
+                padding: 0 16px;
+            }
+
+            .header-left {
+                gap: 12px;
+            }
+
+            .title {
+                font-size: 16px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .content-inner {
+                max-width: 100%;
+            }
+
+            .editor {
+                height: 60vh;
+            }
+
+            .markdown-toolbar {
+                padding: 6px;
+                gap: 6px;
+            }
+
+            .md-btn {
+                padding: 8px 10px;
+                font-size: 12px;
+            }
+
+            .modal {
+                max-width: 90%;
+                margin: 0 16px;
+            }
+
+            .btn {
+                padding: 10px 14px;
+                font-size: 13px;
+            }
+        }
+
+        /* ==================== MOBILE (480px) ==================== */
+        @media (max-width: 480px) {
+            .app {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .sidebar-header {
+                padding: 12px 16px;
+            }
+
+            .logo {
+                font-size: 16px;
+            }
+
+            .btn-add {
+                font-size: 28px;
+                padding: 8px 12px;
+            }
+
+            .tab-item {
+                padding: 14px 12px;
+                font-size: 15px;
+            }
+
+            .tab-item.child {
+                margin-left: 20px;
+                font-size: 14px;
+            }
+
+            .tab-icon {
+                font-size: 18px;
+            }
+
+            .tab-actions {
+                opacity: 1;
+                gap: 8px;
+            }
+
+            .tab-delete {
+                font-size: 16px;
+                padding: 6px 8px;
+            }
+
+            .header {
+                height: 56px;
+                padding: 0 12px;
+            }
+
+            .header-left {
+                gap: 8px;
+                flex: 1;
+                min-width: 0;
+            }
+
+            .btn-menu {
+                font-size: 28px;
+                padding: 4px;
+            }
+
+            .title {
+                font-size: 14px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 120px;
+            }
+
+            .header .btn-secondary {
+                padding: 8px 10px;
+                font-size: 12px;
+            }
+
+            .header .btn-secondary span {
+                display: none;
+            }
+
+            .content {
+                padding: 16px;
+            }
+
+            .editor {
+                height: 55vh;
+                font-size: 14px;
+                padding: 16px;
+            }
+
+            .editor-container {
+                height: auto;
+            }
+
+            .markdown-toolbar {
+                padding: 8px;
+                gap: 4px;
+                justify-content: flex-start;
+                overflow-x: auto;
+                flex-wrap: nowrap;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .md-btn {
+                padding: 10px 12px;
+                font-size: 14px;
+                flex-shrink: 0;
+            }
+
+            .text-content {
+                font-size: 15px;
+                line-height: 1.7;
+            }
+
+            .text-content h1 {
+                font-size: 24px;
+            }
+
+            .text-content h2 {
+                font-size: 20px;
+            }
+
+            .text-content h3 {
+                font-size: 18px;
+            }
+
+            .text-content pre {
+                padding: 12px;
+                font-size: 12px;
+            }
+
+            .text-content table {
+                font-size: 13px;
+            }
+
+            .text-content table th,
+            .text-content table td {
+                padding: 8px;
+            }
+
+            .modal-bg {
+                padding: 16px;
+                align-items: flex-start;
+                padding-top: 60px;
+            }
+
+            .modal {
+                max-width: 100%;
+                padding: 20px;
+            }
+
+            .modal h3 {
+                font-size: 18px;
+            }
+
+            .input {
+                padding: 14px;
+                font-size: 16px;
+            }
+
+            .select {
+                padding: 14px;
+                font-size: 16px;
+            }
+
+            .radio-group {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .radio-label {
+                padding: 12px;
+                background: #0f172a;
+                border-radius: 6px;
+                border: 1px solid #475569;
+            }
+
+            .modal-btns {
+                flex-direction: column-reverse;
+                gap: 12px;
+            }
+
+            .modal-btns .btn-cancel,
+            .modal-btns .btn {
+                width: 100%;
+                justify-content: center;
+                padding: 14px;
+            }
+
+            .btn-cancel {
+                background: #334155;
+                border-radius: 6px;
+            }
+
+            .empty {
+                padding: 40px 20px;
+                font-size: 14px;
+            }
+
+            .empty p {
+                text-align: center;
+            }
+
+            .loading {
+                padding: 30px;
+                font-size: 14px;
+            }
+
+            .error-box {
+                margin: 16px;
+                padding: 16px;
+            }
+
+            .error-box h2 {
+                font-size: 16px;
+            }
+
+            .error-box p {
+                font-size: 13px;
+            }
+        }
+
+        /* Touch-friendly improvements */
+        @media (hover: none) and (pointer: coarse) {
+            .tab-actions {
+                opacity: 1;
+            }
+
+            .tab-item {
+                min-height: 48px;
+            }
+
+            .btn,
+            .btn-add,
+            .md-btn,
+            .expand-btn {
+                min-height: 44px;
+                min-width: 44px;
+            }
+
+            .expand-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 14px;
+            }
+        }
+
+        /* Landscape mode adjustments for mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .editor {
+                height: 50vh;
+            }
+
+            .modal-bg {
+                padding-top: 20px;
+                overflow-y: auto;
+            }
+        }
     </style>
 </head>
 
@@ -613,7 +952,7 @@
             const [selectedParentId, setSelectedParentId] = React.useState('');
             const [editing, setEditing] = React.useState(false);
             const [content, setContent] = React.useState('');
-            const [sidebarOpen, setSidebarOpen] = React.useState(true);
+            const [sidebarOpen, setSidebarOpen] = React.useState(() => window.innerWidth > 768);
             const [editingTabId, setEditingTabId] = React.useState(null);
             const [editingTabTitle, setEditingTabTitle] = React.useState('');
             const [configError, setConfigError] = React.useState(!window.FIREBASE_CONFIG);
@@ -621,6 +960,29 @@
             const [draggedItem, setDraggedItem] = React.useState(null);
             const [dragOverItem, setDragOverItem] = React.useState(null);
             const editorRef = React.useRef(null);
+
+            // Handle window resize for responsive sidebar
+            React.useEffect(() => {
+                let previousWidth = window.innerWidth;
+
+                const handleResize = () => {
+                    const currentWidth = window.innerWidth;
+
+                    // Transitioning from mobile to desktop
+                    if (previousWidth <= 768 && currentWidth > 768) {
+                        setSidebarOpen(true);
+                    }
+                    // Transitioning from desktop to mobile
+                    else if (previousWidth > 768 && currentWidth <= 768) {
+                        setSidebarOpen(false);
+                    }
+
+                    previousWidth = currentWidth;
+                };
+
+                window.addEventListener('resize', handleResize);
+                return () => window.removeEventListener('resize', handleResize);
+            }, []);
 
             // Markdown helper functions
             const insertMarkdown = (before, after = '', placeholder = '') => {
@@ -864,60 +1226,76 @@
                 );
             }
 
+            // Check if mobile (for auto-closing sidebar)
+            const isMobile = () => window.innerWidth <= 768;
+
+            const handleTabClick = (tabId) => {
+                setActiveTabId(tabId);
+                setEditing(false);
+                // Close sidebar on mobile after selecting a tab
+                if (isMobile()) {
+                    setSidebarOpen(false);
+                }
+            };
+
             return (
                 <div className="app">
-                    {sidebarOpen && (
-                        <div className="sidebar">
-                            <div className="sidebar-header">
-                                <div className="logo">⚡ Şimşek Kurye</div>
-                                <button className="btn-add" onClick={() => setShowModal(true)}>+</button>
-                            </div>
-                            <div className="tabs-list">
-                                {loading ? (
-                                    <div className="loading">Yükleniyor...</div>
-                                ) : tabs.length === 0 ? (
-                                    <div className="loading">Henüz sekme yok<br />'+' ile ekleyin</div>
-                                ) : organizedTabs.map(tab => {
-                                    const isParent = tab.type === 'parent' || !tab.parentId;
-                                    const isChild = tab.type === 'child' && tab.parentId;
-                                    const hasChildren = isParent && tabs.some(t => t.parentId === tab.id);
-                                    const isExpanded = expandedGroups[tab.id];
-                                    const isDragging = draggedItem?.id === tab.id;
-                                    const isDragOver = dragOverItem?.id === tab.id;
+                    {/* Sidebar Overlay for mobile */}
+                    <div
+                        className={`sidebar-overlay ${sidebarOpen ? 'show' : ''}`}
+                        onClick={() => setSidebarOpen(false)}
+                    ></div>
 
-                                    return (
-                                        <div
-                                            key={tab.id}
-                                            className={`tab-item ${isParent ? 'parent' : ''} ${isChild ? 'child' : ''} ${activeTabId === tab.id ? 'active' : ''} ${isDragging ? 'dragging' : ''} ${isDragOver ? 'drag-over' : ''}`}
-                                            onClick={() => { setActiveTabId(tab.id); setEditing(false); }}
-                                            draggable
-                                            onDragStart={(e) => handleDragStart(e, tab)}
-                                            onDragOver={(e) => handleDragOver(e, tab)}
-                                            onDragLeave={handleDragLeave}
-                                            onDrop={(e) => handleDrop(e, tab)}
-                                            onDragEnd={handleDragEnd}
-                                        >
-                                            {isParent && hasChildren && (
-                                                <button
-                                                    className="expand-btn"
-                                                    onClick={(e) => { e.stopPropagation(); toggleGroup(tab.id); }}
-                                                >
-                                                    {isExpanded ? '▼' : '▶'}
-                                                </button>
-                                            )}
-                                            {isParent && !hasChildren && <span style={{ width: 16 }}></span>}
-                                            <span className="tab-icon">{isParent ? '📁' : '📄'}</span>
-                                            <span className="tab-title">{tab.title}</span>
-                                            <div className="tab-actions">
-                                                <span className="tab-delete" onClick={(e) => { e.stopPropagation(); setEditingTabId(tab.id); setEditingTabTitle(tab.title); }}>✏️</span>
-                                                <span className="tab-delete" onClick={(e) => { e.stopPropagation(); deleteTab(tab.id); }}>🗑️</span>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                    <div className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
+                        <div className="sidebar-header">
+                            <div className="logo">⚡ Şimşek Kurye</div>
+                            <button className="btn-add" onClick={() => setShowModal(true)}>+</button>
                         </div>
-                    )}
+                        <div className="tabs-list">
+                            {loading ? (
+                                <div className="loading">Yükleniyor...</div>
+                            ) : tabs.length === 0 ? (
+                                <div className="loading">Henüz sekme yok<br />'+' ile ekleyin</div>
+                            ) : organizedTabs.map(tab => {
+                                const isParent = tab.type === 'parent' || !tab.parentId;
+                                const isChild = tab.type === 'child' && tab.parentId;
+                                const hasChildren = isParent && tabs.some(t => t.parentId === tab.id);
+                                const isExpanded = expandedGroups[tab.id];
+                                const isDragging = draggedItem?.id === tab.id;
+                                const isDragOver = dragOverItem?.id === tab.id;
+
+                                return (
+                                    <div
+                                        key={tab.id}
+                                        className={`tab-item ${isParent ? 'parent' : ''} ${isChild ? 'child' : ''} ${activeTabId === tab.id ? 'active' : ''} ${isDragging ? 'dragging' : ''} ${isDragOver ? 'drag-over' : ''}`}
+                                        onClick={() => handleTabClick(tab.id)}
+                                        draggable
+                                        onDragStart={(e) => handleDragStart(e, tab)}
+                                        onDragOver={(e) => handleDragOver(e, tab)}
+                                        onDragLeave={handleDragLeave}
+                                        onDrop={(e) => handleDrop(e, tab)}
+                                        onDragEnd={handleDragEnd}
+                                    >
+                                        {isParent && hasChildren && (
+                                            <button
+                                                className="expand-btn"
+                                                onClick={(e) => { e.stopPropagation(); toggleGroup(tab.id); }}
+                                            >
+                                                {isExpanded ? '▼' : '▶'}
+                                            </button>
+                                        )}
+                                        {isParent && !hasChildren && <span style={{ width: 16 }}></span>}
+                                        <span className="tab-icon">{isParent ? '📁' : '📄'}</span>
+                                        <span className="tab-title">{tab.title}</span>
+                                        <div className="tab-actions">
+                                            <span className="tab-delete" onClick={(e) => { e.stopPropagation(); setEditingTabId(tab.id); setEditingTabTitle(tab.title); }}>✏️</span>
+                                            <span className="tab-delete" onClick={(e) => { e.stopPropagation(); deleteTab(tab.id); }}>🗑️</span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
                     <div className="main">
                         <div className="header">
                             <div className="header-left">
